@@ -1,0 +1,24 @@
+# raw competition data (1.1 GB — keep locally, never commit)
+*.jsonl
+
+# generated artifacts (submissions, OOF/test probability arrays)
+*.csv
+*.npy
+
+# preserved experiment history — kept on disk, out of the tracked tree
+archive/
+
+# python / notebooks
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# editor / local tooling
+.vscode/
+.claude/
+
+# stray logs
+*.log
+
+# any submission file (incl. malformed names)
+submission_*
