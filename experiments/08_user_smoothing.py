@@ -8,18 +8,15 @@ test-time averaging exactly).
 Tests several proxy-key tightnesses to see how much grouping precision matters.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import config
 import json
 import hashlib
 import numpy as np
 from sklearn.metrics import accuracy_score
 
-HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TRAIN = config.TRAIN_PATH
-
-mlp = np.load(HERE + "/mlp_oof_probs.npy")
-lgb = np.load(HERE + "/lgb_oof_probs.npy")
+mlp = np.load(os.path.join(config.PRED_DIR, "mlp_oof_probs.npy"))
+lgb = np.load(os.path.join(config.PRED_DIR, "lgb_oof_probs.npy"))
 blend = 0.55 * mlp + 0.45 * lgb
 n = len(blend)
 print(f"OOF rows: {n}")
@@ -35,7 +32,7 @@ labels = np.empty(n, dtype=np.int64)
 k_created = []          # created_at only
 k_color = []            # created_at + user-constant colors (precise per-user)
 k_coloronly = []        # colors only
-with open(TRAIN, "r", encoding="utf-8") as f:
+with open(config.TRAIN_PATH, "r", encoding="utf-8") as f:
     for i, line in enumerate(f):
         if i >= n:
             break

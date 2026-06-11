@@ -9,7 +9,7 @@ cannot cross a label boundary), and the only thing keeping accuracy below 100% i
 the features separate DIFFERENT users -- the honest ~85% ceiling. See 08_user_smoothing.py.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import config
 
 import json

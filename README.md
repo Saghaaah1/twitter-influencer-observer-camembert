@@ -1,91 +1,74 @@
-# Influencer or Observer: Predicting Social Roles
+# Influencer or Observer — Predicting Social Roles
 
-## Team
+Binary classification of French Twitter accounts (influencer vs. observer) from tweet
+metadata + text. **Final result: public LB 0.856 — tied for #1.**
+
+The whole approach is built around one principle: **don't fool yourself with identity
+leakage.** The public test set is 100% disjoint users, so only signal that generalizes
+across *different* users counts. See [`docs/SOLUTION_README.md`](docs/SOLUTION_README.md)
+for the full write-up and [`experiments/README.md`](experiments/README.md) for the evidence.
+
+## Repository layout
+
+```
+.
+├── src/                      # production pipeline (run these)
+│   ├── config.py             #   single source of truth: paths, seed, hyperparameters
+│   ├── features.py           #   honest feature engineering + fold-safe source target encoding
+│   ├── model.py              #   TabularMLP (256->128->64->1)
+│   ├── train.py              #   tabular pipeline: CV -> MLP + LightGBM blend -> smooth -> submission
+│   ├── stack_models.py       #   adds CatBoost / XGBoost / HistGBM / ExtraTrees
+│   ├── finetune_camembert.py #   fine-tune CamemBERT on tweet text
+│   ├── finetune_camembert_bio.py  # fine-tune CamemBERT on bio + tweet
+│   └── make_submission.py    #   blend all model predictions + per-user smoothing -> final CSV
+├── experiments/              # 12 numbered probes — the evidence behind every decision
+├── exploration/              # initial data-understanding scripts + feature_lineage/
+├── data/                     # train.jsonl / kaggle_test.jsonl (gitignored — place here)
+├── output/                   # submissions, model_predictions/ (prob arrays), runs/ (gitignored)
+└── docs/                     # SOLUTION_README.md (detailed) + PIPELINE.zh.md (Chinese)
+```
 
 ## Setup
 
 ```bash
-conda activate sara
-# or pip install pandas scikit-learn lightgbm nltk scipy
+conda activate sara    # or: pip install pandas scikit-learn lightgbm torch transformers
+# place train.jsonl and kaggle_test.jsonl in data/
 ```
 
-## Data
-
-Place `train.jsonl` and `kaggle_test.jsonl` in the same directory as the scripts.
-
-## Running the best model
+## Reproduce the 0.856 submission
 
 ```bash
-python sub19_with_source.py       # Best honest unsubmitted candidate
+cd src
+python train.py --group --blend --smooth   # MLP + LightGBM, honest CV, per-user smoothing
+python stack_models.py                      # add CatBoost / XGBoost / HistGBM / ExtraTrees
+python finetune_camembert.py                # fine-tune CamemBERT on tweet text   (GPU, ~1 hr)
+python finetune_camembert_bio.py            # fine-tune CamemBERT on bio + tweet   (GPU, ~1 hr)
+python make_submission.py                   # blend everything -> output/submission_final.csv
 ```
 
-## Model progression (CV accuracy)
+Each model writes aligned `<name>_oof_probs.npy` / `<name>_test_probs.npy` into
+`output/model_predictions/`; `make_submission.py` auto-discovers them, selects ensemble
+weights by greedy search on the per-user-smoothed OOF, and writes the final submission.
 
-| Script | Approach | CV Acc |
-|--------|----------|--------|
-| sub1_tfidf_lr.py | TF-IDF + Logistic Regression | 67.1% |
-| sub2_tfidf_lgbm.py | TF-IDF + LightGBM | 63.5% |
-| sub3_features_lgbm.py | Metadata features + LightGBM | 87.47% |
-| sub4_combined_lgbm.py | SVD text + metadata | 85.3% |
-| sub5_user_agg.py | User aggregations + LightGBM | 91.14% |
-| sub6_user_label_enc.py | User label enc + SVD | 85.3% |
-| sub7_rich_features.py | Rich features + OOF user target enc | 93.18% |
-| sub9_best_features.py | Rich features v2 | 92.93% |
-| sub10_user_agg_v2.py | Maximal user aggregations + LightGBM | **94.40%** |
-| sub12_final_best.py | All features + user agg | 93.99% |
-| sub13_ensemble_best.py | Ensemble of sub7+sub9+sub10+sub12 | ~94.5% |
-| sub15_final_push.py | Multi-seed LightGBM | ~94.5%+ |
-| sub19_with_source.py | Honest base features + source app signal | ~90.5% CV |
-| sub20_nested_source_fingerprint.py | Profile fingerprint TE; CV likely identity-proxy inflated | 93.40% |
-| sub21_rich_profile_source.py | Profile color/source categorical TE; CV inflated, public 0.839 | 97.48% CV / 0.839 public |
+## How it got to 0.856
 
-## Key Findings
+| Stage | honest OOF | public LB |
+|-------|-----------|-----------|
+| MLP + LightGBM blend | 84.31% | — |
+| + per-user smoothing (label is user-constant) | 84.78% | 0.848 |
+| + CatBoost / HistGBM / ExtraTrees stack | 84.84% | 0.850 |
+| + fine-tuned CamemBERT (tweet) | 85.14% | 0.852 |
+| + CamemBERT (bio + tweet) | 85.40% | **0.856** |
 
-### What works (and why)
+### Key findings
+1. **Direct user IDs are stripped** (`user.id` / `screen_name` absent), and train/test users
+   are 100% disjoint — so any per-user "aggregation" is leakage, not signal.
+2. **Honest CV is everything.** Row-wise CV reached 97% but only 0.839 public (identity
+   memorization). `StratifiedGroupKFold` by `user.created_at` gives an honest ~84% that
+   tracks the LB. (`experiments/01,02,12`)
+3. **The label is 100% user-constant** → it's a user-classification task → per-user
+   prediction smoothing is the biggest single gain. (`experiments/07,08`)
+4. **Metadata saturates ~0.850; French text (CamemBERT) is the one fresh signal** that
+   pushed it to 0.856. Bigger/other transformers add nothing (`experiments/10,11`, `archive/`).
 
-1. **User profile metadata is the strongest signal** (87% from metadata alone):
-   - `user_account_age_days`: Older accounts are more likely influencers
-   - `user_statuses_count`: More tweets = influencer signal
-   - `user_favourites_count` / tweet = behavioural ratio
-   - `tweets_per_day`: Activity level
-
-2. **Important correction: direct user IDs are stripped**:
-   - `user.id`, `user.id_str`, and `user.screen_name` are not present.
-   - The top-level `id_str` is the tweet id, not a user id.
-   - Earlier "user aggregation" scripts therefore do not truly aggregate by user.
-   - Profile fingerprints are mostly unique in train, so they add less than expected.
-
-3. **Source app is the safest new signal**:
-   - Tweet source app has real signal: TweetDeck/Hootsuite/Buffer-style tools are more common for influencers.
-   - Profile color/background fields are user-constant and can act as identity proxies under row-wise CV.
-   - `sub21_rich_profile_source.py` reached 97.48% CV but only 0.839 public, so treat that CV as invalid.
-
-4. **Text features add little (~63% alone)**:
-   - The label is about WHO tweets, not WHAT they tweet
-   - SVD-compressed text actually *hurts* when combined with metadata (85% vs 87%)
-   - Key text signal: caps_ratio, text_len, hashtag/mention counts
-
-5. **Quoted tweet features provide indirect follower signals**:
-   - `quoted_status.user.followers_count`: Present! Direct followers/friends 
-     of main user are stripped, but quoted user's stats are available
-   - High-follower quoted users indicate influencer behavior
-
-### Feature Engineering Details
-
-```python
-# Most important features (from sub10 LightGBM):
-user_account_age_days   # How long the user has been on Twitter
-fav_per_tweet           # Favourites per tweet ratio
-user_favourites_count   # Total favourites
-tweets_per_day          # Activity level
-user_statuses_count     # Total tweets ever
-listed_per_tweet        # Listed count per tweet
-caps_ratio              # Writing style signal
-d_caps_ratio            # Deviation from user's own mean caps ratio
-```
-
-### Model Architecture
-
-- **LightGBM** with 255 leaves, early stopping
-- **5-fold stratified cross-validation** with out-of-fold predictions
-- **Ensemble**: weighted average by CV score
+0.856 is the data's honest ceiling — the whole leaderboard plateaus there.

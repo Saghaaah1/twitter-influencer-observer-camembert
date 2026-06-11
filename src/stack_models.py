@@ -19,7 +19,7 @@ from sklearn.metrics import accuracy_score
 import config
 import features as F
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = config.PRED_DIR  # aligned prob arrays live in output/model_predictions/
 SEED = config.SEED
 N = config.N_FOLDS
 
@@ -186,6 +186,6 @@ test_ens = sum(w[k] * stest[k] for k in w) / tot
 preds = (test_ens > thr).astype(int)
 sub = pd.DataFrame({"ID": test["challenge_id"], "Prediction": preds})
 assert len(sub) == 103380 and not sub["ID"].duplicated().any()
-out = os.path.join(HERE, "submission_stack.csv")
+out = os.path.join(config.OUTPUT_DIR, "submission_stack.csv")
 sub.to_csv(out, index=False)
 print(f"\nSaved {out}  (pred mean {preds.mean():.4f})")

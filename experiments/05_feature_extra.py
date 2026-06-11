@@ -3,7 +3,7 @@ ratios + quoted completeness collectively break the ~83.8% GroupKFold ceiling?
 Add features one GROUP at a time (additive) so we see which group, if any, actually lifts.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import config
 import re
 import numpy as np

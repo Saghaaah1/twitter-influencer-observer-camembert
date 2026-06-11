@@ -3,7 +3,8 @@
 These are the validation scripts that justify every non-obvious choice in the pipeline.
 They are kept as a reproducible audit trail: each one is model-agnostic (mostly LightGBM
 under honest `StratifiedGroupKFold`) and answers a single question. Run any of them with the
-project's Python environment from the repo root, e.g. `python experiments/02_train_test_overlap.py`.
+project's Python environment from the repo root, e.g. `python experiments/02_train_test_overlap.py`
+(they import `config`/`features` from `../src/` automatically).
 
 The thread running through all of them: **the public test set is disjoint-user, so only
 signal that generalizes across *different* users counts.** Row-wise CV that lets the same

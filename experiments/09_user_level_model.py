@@ -6,7 +6,7 @@ can't see. Honest: grouping key (user.created_at) is available at inference; no 
 in aggregation. One row per user -> plain StratifiedKFold over users is leak-free.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import config
 import numpy as np
 import pandas as pd

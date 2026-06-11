@@ -8,7 +8,7 @@ Proxy user key = user.created_at (per-account constant) + hash(description|locat
 which is near-unique per account and available on BOTH files.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import config
 import json
 import hashlib

@@ -5,19 +5,23 @@ Single source of truth for paths, seed, and hyperparameters.
 import os
 
 # === Paths ===
-# Data lives one directory up from the repo root.
-_HERE = os.path.dirname(os.path.abspath(__file__))
-_DATA_DIR = os.path.dirname(_HERE)
+# Repo layout:  <root>/src/config.py  ·  <root>/data/*.jsonl  ·  <root>/output/...
+_HERE = os.path.dirname(os.path.abspath(__file__))            # <root>/src
+_ROOT = os.path.dirname(_HERE)                                # <root>
+DATA_DIR = os.path.join(_ROOT, "data")
+OUTPUT_DIR = os.path.join(_ROOT, "output")
+PRED_DIR = os.path.join(OUTPUT_DIR, "model_predictions")      # aligned OOF/test prob arrays
+os.makedirs(PRED_DIR, exist_ok=True)
 
-TRAIN_PATH = os.path.join(_DATA_DIR, "train.jsonl")
-TEST_PATH = os.path.join(_DATA_DIR, "kaggle_test.jsonl")
+TRAIN_PATH = os.path.join(DATA_DIR, "train.jsonl")
+TEST_PATH = os.path.join(DATA_DIR, "kaggle_test.jsonl")
 
-SUBMISSION_PATH = os.path.join(_HERE, "submission_mlp.csv")
-OOF_PATH = os.path.join(_HERE, "mlp_oof_probs.npy")
-TEST_PROBS_PATH = os.path.join(_HERE, "mlp_test_probs.npy")
+SUBMISSION_PATH = os.path.join(OUTPUT_DIR, "submission_mlp.csv")
+OOF_PATH = os.path.join(PRED_DIR, "mlp_oof_probs.npy")
+TEST_PROBS_PATH = os.path.join(PRED_DIR, "mlp_test_probs.npy")
 
 # TensorBoard log directory (one run per launch -> subfolders created in train.py).
-LOG_DIR = os.path.join(_HERE, "runs")
+LOG_DIR = os.path.join(OUTPUT_DIR, "runs")
 
 # === Reproducibility ===
 SEED = 42

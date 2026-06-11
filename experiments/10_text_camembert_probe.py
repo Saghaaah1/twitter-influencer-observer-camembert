@@ -10,7 +10,7 @@ Pipeline: mean-pooled camembert-base embedding of each tweet (cached) -> global 
 metadata-only vs metadata+text, raw and per-user-smoothed.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import os
 import numpy as np
 import pandas as pd
@@ -23,7 +23,7 @@ import config
 import features as F
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-EMB_CACHE = os.path.join(HERE, "text_emb_camembert.npy")
+EMB_CACHE = os.path.join(config.OUTPUT_DIR, "text_emb_camembert.npy")
 NROWS = None  # full
 
 print("Loading train...")

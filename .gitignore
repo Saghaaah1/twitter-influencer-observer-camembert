@@ -1,9 +1,11 @@
-# raw competition data (1.1 GB — keep locally, never commit)
+# raw competition data — keep locally in data/, never commit (1.1 GB)
 *.jsonl
+data/*.jsonl
 
-# generated artifacts (submissions, OOF/test probability arrays)
+# generated artifacts: submissions, OOF/test probability arrays, embeddings
 *.csv
 *.npy
+output/runs/
 
 # preserved experiment history — kept on disk, out of the tracked tree
 archive/
@@ -19,6 +21,3 @@ __pycache__/
 
 # stray logs
 *.log
-
-# any submission file (incl. malformed names)
-submission_*

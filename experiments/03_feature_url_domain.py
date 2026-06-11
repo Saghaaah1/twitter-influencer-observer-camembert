@@ -7,7 +7,7 @@ If the candidate beats baseline under GroupKFold (disjoint users ~ public LB), t
 domain carries genuine, generalizing signal — not a per-user identity proxy.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import config
 import re
 import numpy as np

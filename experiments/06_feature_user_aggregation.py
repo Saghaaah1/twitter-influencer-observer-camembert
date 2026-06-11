@@ -7,7 +7,7 @@ wholly inside one fold, so a val user's aggregates use only that user's val rows
 train->val leak. Question: does denoising per-tweet signals to per-user lift the ceiling?
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 import config
 import numpy as np
 import pandas as pd
