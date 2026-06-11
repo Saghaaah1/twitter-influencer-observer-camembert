@@ -7,7 +7,7 @@ The gap between (1)/(2) and (3) is identity memorization that does NOT transfer 
 strangers. The public test is 100% strangers, so only (3) predicts it.
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np, pandas as pd
 from pandas import json_normalize
 import lightgbm as lgb

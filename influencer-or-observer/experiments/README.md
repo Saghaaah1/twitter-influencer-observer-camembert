@@ -20,6 +20,9 @@ user span folds inflates the score by memorizing identity.
 | 07 | `07_label_user_consistency.py` | Is the label consistent within a user? | **100% user-constant** (0 mixed-label groups / 30,696 users). → This is a *user*-classification task. |
 | 08 | `08_user_smoothing.py` | Does averaging each user's tweet predictions help? | **+0.47%** (blend 84.31% → 84.78%). The single biggest post-feature gain. `created_at` is the right key; per-tweet-varying fields over-split it; colors alone collide. |
 | 09 | `09_user_level_model.py` | Does an explicit user-level aggregated model beat smoothing? | 84.48% — slightly *below* the smoothed diverse blend; aggregation ≈ smoothing, and model diversity matters more. |
+| 10 | `10_text_camembert_probe.py` | Does a frozen CamemBERT tweet embedding add signal over metadata? | **+0.28%** (84.54% → 84.82%) — first real lift beyond metadata. Justified fine-tuning CamemBERT (the 0.850 → 0.856 push). |
+| 11 | `11_hashtag_mention_te.py` | Does fold-safe TE of *which* hashtags / mentioned accounts a user uses help? | **Negative** (84.54% → 84.37%) — overfits fold-specific tags, does not generalize to new users. |
+| 12 | `12_memorize_vs_honest.py` | Why can CV look ~100% but public cap at ~0.856? | memorize-train **100%** → row-wise CV 87.6% → honest disjoint-user CV **84.1%**. The 16-pt gap is identity memorization that does NOT transfer to the all-strangers public test. |
 
 ### Headline numbers (honest `GroupKFold` OOF)
 
@@ -29,9 +32,18 @@ metadata baseline (LightGBM) ......... 83.83%
 honest feature ceiling ............... ~83.9%
 MLP + LightGBM blend ................. 84.31%
   + per-user smoothing ............... 84.78%   -> public 0.848
-4-model stack (+ HistGBM/ExtraTrees) . 84.84%   (marginal)
+4-model stack (+ HistGBM/ExtraTrees) . 84.84%   -> public 0.850
+  + CatBoost + fine-tuned CamemBERT .. 85.14%   -> public 0.852
+  + CamemBERT(bio+tweet) ............. 85.40%   -> public 0.856  (tied #1)
 ```
+
+**Why CamemBERT and not TwHIN-BERT?** The tweets are French — CamemBERT is French-specific,
+TwHIN-BERT is multilingual (shallower French). In testing, TwHIN-BERT added **+0.00%** to the
+ensemble and CamemBERT-large added **+0.04%** (noise), so the production pipeline keeps only
+fine-tuned **CamemBERT-base** (tweet, and bio+tweet). Those dropped attempts live in
+`../../archive/transformer_deadends/`.
 
 **Takeaway:** the metadata signal is saturated at the ~84–85% honest ceiling; feature
 engineering does not move it. The gains came from (a) honest CV to stop fooling ourselves,
-(b) recognizing the task is user-level, and (c) smoothing + model-diversity blending.
+(b) recognizing the task is user-level (smoothing), and (c) adding fine-tuned French-text
+signal (CamemBERT) on top — which is what carried the ensemble to **0.856, tied for #1**.

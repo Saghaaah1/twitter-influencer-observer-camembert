@@ -9,6 +9,8 @@ Pipeline: mean-pooled camembert-base embedding of each tweet (cached) -> global 
 -> concat to the metadata features -> LightGBM under StratifiedGroupKFold -> compare
 metadata-only vs metadata+text, raw and per-user-smoothed.
 """
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import os
 import numpy as np
 import pandas as pd

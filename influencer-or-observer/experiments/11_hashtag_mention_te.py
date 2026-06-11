@@ -6,7 +6,7 @@ smoothed mean-label computed on the fold's TRAIN rows only, aggregated per tweet
 over its tags), applied to val/test. Compared under StratifiedGroupKFold (disjoint users).
 """
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np, pandas as pd
 from pandas import json_normalize
 import lightgbm as lgb
