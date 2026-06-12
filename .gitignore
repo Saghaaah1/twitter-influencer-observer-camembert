@@ -5,7 +5,7 @@ data/*.jsonl
 # generated artifacts: submissions, OOF/test probability arrays, embeddings
 *.csv
 *.npy
-output/runs/
+output/
 
 # python / notebooks
 __pycache__/
@@ -18,3 +18,6 @@ __pycache__/
 
 # stray logs
 *.log
+*.stackdump
+
+.DS_Store
