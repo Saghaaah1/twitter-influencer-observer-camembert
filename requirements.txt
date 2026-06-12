@@ -1,7 +1,7 @@
-# Influencer or Observer — exact pinned versions
-# Reproduces the environment the 0.856 submission was produced in (conda env `sara`).
+# Influencer or Observer 
+
 # Install with:  pip install -r requirements-lock.txt
-#
+
 # NOTE: torch is pinned to the CUDA 12.6 build. On a CPU-only machine, drop the
 # "+cu126" suffix (pip install torch==2.12.0) or install from https://pytorch.org.
 
