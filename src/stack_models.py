@@ -30,9 +30,9 @@ def load(path):
 
 
 def user_key(df):
-    created = df.get("user.created_at", pd.Series("", index=df.index)).fillna("").astype(str)
-    name = df.get("user.name", pd.Series("", index=df.index)).fillna("").astype(str)
-    return (created + "||" + name).values
+    # Proxy per-user key for grouping/smoothing. Direct ids (incl. user.name) are stripped;
+    # user.created_at alone is constant per account and near-unique -> reliable key.
+    return df.get("user.created_at", pd.Series("", index=df.index)).fillna("").astype(str).values
 
 
 def assemble(X_base, parsed_src, df, te_map, gmean):

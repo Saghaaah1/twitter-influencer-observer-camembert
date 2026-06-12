@@ -59,17 +59,16 @@ def load_data(path, nrows=None):
 def build_user_group_key(df):
     """Proxy per-user key for GroupKFold — used ONLY to split folds, never as a feature.
 
-    Direct user ids (user.id / id_str / screen_name) are stripped from this data, but
-    `user.created_at` is EXACTLY constant per account and near-unique across accounts;
-    combining it with `user.name` makes a robust grouping key. Grouping by this key keeps
+    Direct user ids (user.id / id_str / screen_name / name) are stripped from this data,
+    but `user.created_at` is EXACTLY constant per account and near-unique across accounts,
+    so it alone is a reliable proxy user key (verified: 0 mixed-label groups, and adding
+    other user-constant fields does not change the grouping). Grouping by this key keeps
     every user's rows inside a single fold, so user-CONSTANT features (tweets_per_day,
     log_age, desc_len, source_te, ...) can no longer be memorized as identity proxies and
     inflate the OOF. The resulting OOF tracks a disjoint-user public test set (the sub21
     cautionary tale). The key is discarded after splitting; it does not enter X.
     """
-    created = df.get("user.created_at", pd.Series("", index=df.index)).fillna("").astype(str)
-    name = df.get("user.name", pd.Series("", index=df.index)).fillna("").astype(str)
-    return (created + "||" + name).values
+    return df.get("user.created_at", pd.Series("", index=df.index)).fillna("").astype(str).values
 
 
 @torch.no_grad()
