@@ -1,7 +1,7 @@
 # Influencer or Observer — Predicting Social Roles
 
 Binary classification of French Twitter accounts (**influencer** vs. **observer**) from a
-single tweet's metadata and text. **Final result: public leaderboard 0.857 — 4th place.**
+single tweet's metadata and text. **Final result: public leaderboard 0.857.**
 
 The whole approach is built around one principle: **don't fool yourself with identity
 leakage.** Direct user IDs are stripped from the data and the public test set is made of
