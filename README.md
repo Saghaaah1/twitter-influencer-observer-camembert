@@ -85,8 +85,7 @@ the final submission. Quick sanity check: `python main.py --smoke`.
 
 OOF tracks the public leaderboard closely throughout — the payoff of honest validation.
 Metadata signal saturates around 0.850; every gain past it comes from **richer text
-modelling**, culminating in the user-level CamemBERT. (Top of the leaderboard at submission
-time was 0.865; 0.857 placed **4th**.)
+modelling**, culminating in the user-level CamemBERT. 
 
 ---
 
